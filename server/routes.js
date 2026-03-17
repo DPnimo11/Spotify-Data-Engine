@@ -71,7 +71,7 @@ const random = async function(req, res) {
       // TODO (TASK 3): also return the song title in the response
       res.json({
         song_id: data.rows[0].song_id,
-        song_title: data.rows[0].title
+        title: data.rows[0].title
       });
     }
   });
@@ -162,7 +162,7 @@ const album_songs = async function(req, res) {
 const top_songs = async function(req, res) {
   const page = req.query.page;
   // TODO (TASK 8): use the ternary (or nullish) operator to set the pageSize based on the query or default to 10
-  const pageSize = req.query.pageSize ?? 10;
+  const pageSize = req.query.page_size ?? 10;
 
   if (!page) {
     // TODO (TASK 9)): query the database and return all songs ordered by number of plays (descending)
@@ -205,7 +205,7 @@ const top_albums = async function(req, res) {
   // TODO (TASK 11): return the top albums ordered by aggregate number of plays of all songs on the album (descending), with optional pagination (as in route 7)
   // Hint: you will need to use a JOIN and aggregation to get the total plays of songs in an album
   const page = req.query.page;
-  const pageSize = req.query.pageSize ?? 10;
+  const pageSize = req.query.page_size ?? 10;
 
   if (!page) {
     connection.query(`
@@ -245,7 +245,7 @@ const top_albums = async function(req, res) {
 const search_songs = async function(req, res) {
   // TODO (TASK 12): return all songs that match the given search query with parameters defaulted to those specified in API spec ordered by title (ascending)
   // Some default parameters have been provided for you, but you will need to fill in the rest
-  const title = req.query.title ?? '%';
+  const title = req.query.title ? `%${req.query.title}%` : '%';
   const durationLow = req.query.duration_low ?? 60;
   const durationHigh = req.query.duration_high ?? 660;
   const playsLow = req.query.plays_low ?? 0;
@@ -300,7 +300,7 @@ const entrance_songs = async function(req, res) {
     SELECT song_id, s.title, a.title AS album, danceability, energy, valence 
     FROM Songs s
     JOIN Albums a on s.album_id = a.album_id
-    AND danceability >= ${minDanceability}
+    WHERE danceability >= ${minDanceability}
     AND energy <= ${maxEnergy}
     ORDER BY valence DESC, danceability DESC
     Limit ${limit}
